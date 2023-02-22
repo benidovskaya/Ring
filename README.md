@@ -407,7 +407,7 @@ c <- ggboxplot(df_long, x="cell_type", y="density", add="jitter")+
   facet_wrap(~ response) ## duplicate your graph to see the difference in the density of CD3 RORC between patients who respond or not to the treatment
 ```
 
-### What is the difference in the proportions of "immune score" before and after treatment ?
+### What is the difference in the proportions of scoring before and after treatment ?
 
 To answer this question, you will need to create a pie chart and not a box plott.
 
