@@ -558,7 +558,7 @@ Now you saw the different graphs you could generate with your data and you can r
 # Distances-based analysis using G-cross function 
 ## Compared the probability for a i cell (e.g. a tumor cell) to meet a  j cell (e.g. a CD3+ T-cell) inside the tumor biopsy 
 
-For this next section, if you want more details on the Gcross function, you can check the next articles:
+For this next section, if you want more details on the G-cross function, you can check the next articles:
 
 - Parra ER. Methods to Determine and Analyze the Cellular Spatial Distribution Extracted From Multiplex Immunofluorescence Data to Understand the Tumor Microenvironment. Front Mol Biosci. 2021;8:668340. Published 2021 Jun 14. doi:10.3389/fmolb.2021.668340. <https://pubmed.ncbi.nlm.nih.gov/34179080/>.
 - Barua S, Fang P, Sharma A, Fujimoto J, Wistuba I, Rao AUK, Lin SH. Spatial interaction of tumor cells and regulatory T cells correlates with survival in non-small cell lung cancer. Lung Cancer. 2018 Mar;117:73-79. doi: 10.1016/j.lungcan.2018.01.022. <https://pubmed.ncbi.nlm.nih.gov/29409671/>.
@@ -572,7 +572,7 @@ AUC_plot <- function(a){
   
 Main_table <- read.table(a, sep=",",header=TRUE)
   
-Main_table <- Main_table %>% mutate (Xadj = Xadj*1000) %>% mutate (Yadj = Yadj*1000) %>% mutate (flag1 = ifelse(str_detect(Main_table$flag, "CD3+|CD8+"), "CD3+", Main_table$flag)) ## change your CD3+CD8+ into CD3+ cells only
+Main_table <- Main_table %>% mutate (Xadj = Xadj*1000) %>% mutate (Yadj = Yadj*1000) %>% mutate (flag1 = ifelse(str_detect(Main_table$flag, "CD3+|CD8+ CD3+"), "CD3+", Main_table$flag)) ## change your CD3+CD8+ into CD3+ cells only
   
 p.sf <- st_as_sf(Main_table, coords = c("Xadj", "Yadj")) ## change the coordinates into the good format for the spatstat package
 s.sp <- as.ppp(X=st_coordinates(p.sf$geometry), W=p.sf$geometry) 
@@ -645,8 +645,8 @@ quadrat_computation <- function(x){
   as.data.frame(CD8HS)
   
   
-  CD8<- Main_table[which(Main_table$flag=="CD8" | Main_table$flag=="CD8_PD1" | Main_table$flag=="CD8_CD45RO" ), ] 
-  CD4<- Main_table[which(Main_table$flag=="CD4" | Main_table$flag=="CD4_PD1" | Main_table$flag=="CD4_CD45RO"), ]
+  CD8<- Main_table[which(Main_table$flag=="CD8+ CD3+" | Main_table$flag=="CD8+ CD3-"), ] 
+  CD4<- Main_table[which(Main_table$flag=="CD3+"), ]
   CD8<-CD8[c('Xadj', 'Yadj')]
   CD4<-CD4[c('Xadj', 'Yadj')]
   
@@ -693,7 +693,6 @@ quadrat_computation <- function(x){
     return(a)})
   
   
-  
   row.names(a) <- nameOftable
   CD8HS <- rbind(CD8HS, a)
   name_to_store <- paste(output_data,"CD8HS.txt",sep = "")
@@ -727,28 +726,3 @@ quadrat_computation <- function(x){
 lapply(FUN=quadrat_computation, input_vector_x)
 
 ```
-
-
-```{r fig.height=10, fig.width=10, message=FALSE, warning=FALSE, cache=TRUE}
-
-#input_data <- "project/data/"
-
-PD1HS<-c(1,2,3)
-PD1HS <- as.data.frame(PD1HS)
-PD1HS <- t(PD1HS)
-CD4_CD45HS<-c(1,2,3)
-CD4_CD45HS <- as.data.frame(CD4_CD45HS)
-CD4_CD45HS <- t(CD4_CD45HS)
-CD8_CD45HS<-c(1,2,3)
-CD8_CD45HS <- as.data.frame(CD8_CD45HS)
-CD8_CD45HS <- t(CD8_CD45HS)
-
-name_to_store_PD1 <- paste(output_data,"PD1HS.txt",sep = "")
-write.table(PD1HS, file = name_to_store_PD1)
-
-name_to_store_CD4_CD45 <- paste(output_data,"CD4_CD45HS.txt",sep = "")
-write.table(CD4_CD45HS, file = name_to_store_CD4_CD45)
-
-name_to_store_CD8_CD45 <- paste(output_data,"CD8_CD45HS.txt",sep = "")
-write.table(CD8_CD45HS, file = name_to_store_CD8_CD45)
-
