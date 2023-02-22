@@ -566,7 +566,7 @@ For this next section, if you want more details on the Gcross function, you can 
 ```{r}
 setwd("~/project/tables/")
 
-x2 <- list.files ("~/project/data", pattern=".csv")
+x <- list.files ("~/project/data", pattern=".csv")
 
 AUC_plot <- function(a){
   
@@ -605,18 +605,18 @@ complete_plot_path_name <- paste(output_graphs, str_replace(a, ".csv", "_AUC_plo
 ggsave(plot1, file = complete_plot_path_name, dpi = 320, units = "mm")
 }
 
-lapply(FUN = AUC_plot, x2)
+lapply(FUN = AUC_plot, x)
 ```
 
 # Quadrat count 
 
-# 3 HS computation
+Another way of studying the tumor infiltrating lymphocytes is to check for the quadra count. The biopsy can be divided in squares and the lymphocyte infiltration can be studied in each square.
+
+## 3 HS computation
 
 ```{r, warning=FALSE, message=FALSE, cache=TRUE, fig.height=10, fig.width=10}
 
-#input_data <- "Data/Cohort_A/"
-#output_graphs <- "Graphs/Cohort_A/"
-output_data <- "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables/"
+#input_data <- "project/data/"
 
 CD4HS<-c(1,2,3)
 CD4HS <- as.data.frame(CD4HS)
@@ -631,13 +631,7 @@ write.table(CD4HS, file = name_to_store_CD4)
 name_to_store_CD8 <- paste(output_data,"CD8HS.txt",sep = "")
 write.table(CD8HS, file = name_to_store_CD8)
 
-
-input_vector_1 <- list.files(path = "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables", pattern = "w0.csv") 
-input_vector_2 <-  list.files(path = "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables", pattern = "w3.csv")
-input_vector_3 <-  list.files(path = "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables", pattern = "w11.csv")
-
-input_vector_x <- c(input_vector_1, input_vector_2, input_vector_3)
-
+input_vector_x <- list.files("~/project/data", pattern = ".csv")
 
 quadrat_computation <- function(x){
   
@@ -735,12 +729,9 @@ lapply(FUN=quadrat_computation, input_vector_x)
 ```
 
 
-
 ```{r fig.height=10, fig.width=10, message=FALSE, warning=FALSE, cache=TRUE}
 
-#input_data <- "Data/Cohort_A/"
-#output_graphs <- "Graphs/Cohort_A/"
-output_data <- "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables/"
+#input_data <- "project/data/"
 
 PD1HS<-c(1,2,3)
 PD1HS <- as.data.frame(PD1HS)
