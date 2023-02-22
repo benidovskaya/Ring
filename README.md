@@ -608,4 +608,156 @@ ggsave(plot1, file = complete_plot_path_name, dpi = 320, units = "mm")
 lapply(FUN = AUC_plot, x2)
 ```
 
+# Quadrat count 
+
+# 3 HS computation
+
+```{r, warning=FALSE, message=FALSE, cache=TRUE, fig.height=10, fig.width=10}
+
+#input_data <- "Data/Cohort_A/"
+#output_graphs <- "Graphs/Cohort_A/"
+output_data <- "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables/"
+
+CD4HS<-c(1,2,3)
+CD4HS <- as.data.frame(CD4HS)
+CD4HS <- t(CD4HS)
+CD8HS<-c(1,2,3)
+CD8HS <- as.data.frame(CD8HS)
+CD8HS <- t(CD8HS)
+
+name_to_store_CD4 <- paste(output_data,"CD4HS.txt",sep = "")
+write.table(CD4HS, file = name_to_store_CD4)
+
+name_to_store_CD8 <- paste(output_data,"CD8HS.txt",sep = "")
+write.table(CD8HS, file = name_to_store_CD8)
+
+
+input_vector_1 <- list.files(path = "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables", pattern = "w0.csv") 
+input_vector_2 <-  list.files(path = "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables", pattern = "w3.csv")
+input_vector_3 <-  list.files(path = "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables", pattern = "w11.csv")
+
+input_vector_x <- c(input_vector_1, input_vector_2, input_vector_3)
+
+
+quadrat_computation <- function(x){
+  
+  nameOftable <- x
+  input_path <- paste(output_data,nameOftable, sep = "")
+  Main_table <- read.csv(input_path)
+  
+  CD4HS <- read.table(name_to_store_CD4, header=TRUE, sep=" ", stringsAsFactors=FALSE)
+  CD8HS <- read.table(name_to_store_CD8, header=TRUE, sep=" ", stringsAsFactors=FALSE)
+  as.data.frame(CD4HS)
+  as.data.frame(CD8HS)
+  
+  
+  CD8<- Main_table[which(Main_table$flag=="CD8" | Main_table$flag=="CD8_PD1" | Main_table$flag=="CD8_CD45RO" ), ] 
+  CD4<- Main_table[which(Main_table$flag=="CD4" | Main_table$flag=="CD4_PD1" | Main_table$flag=="CD4_CD45RO"), ]
+  CD8<-CD8[c('Xadj', 'Yadj')]
+  CD4<-CD4[c('Xadj', 'Yadj')]
+  
+  
+  
+  Main_table <- sf::st_as_sf(Main_table, coords=c('Xadj', 'Yadj'))
+  polygons <- concaveman(Main_table, concavity = 1, length_threshold = 0)
+  Main_table <- read.csv(input_path)
+  coordinates(Main_table)<- c('Xadj', 'Yadj')
+  summary(Main_table)
+  plot(Main_table, pch = 20, col = "steelblue")
+  plot(Main_table)
+  plot(polygons)
+  poly_total <- as_Spatial(polygons)
+  poly_total <- as.owin.SpatialPolygons(poly_total)
+  box <- boundingbox(poly_total)
+  plot.owin(box)
+  box <- as.data.frame.owin(box)
+  box
+  x1<-box[1,1]
+  x2<-box[2,1]
+  x2
+  x_lenght <- x2-x1
+  x_lenght
+  y1 <- box[1,2]
+  y2 <- box[3,2]
+  y_lenght<-y2-y1
+  y_lenght
+  
+  
+  test.ppp<-ppp(x=CD8$Xadj, y=CD8$Yadj, poly_total)
+  
+  
+  a <- tryCatch({plot(quadratcount(test.ppp, nx = (x_lenght/0.25) , ny = (y_lenght/0.25)))
+    area(poly_total)
+    Qcount<-data.frame(quadratcount(test.ppp, nx= (x_lenght/0.25) , ny = (y_lenght/0.25)))
+    QCountTable <- data.frame(table(Qcount$Freq))
+    QCountTable <- QCountTable[order(QCountTable[,1], decreasing = TRUE),]
+    QCountTable <- QCountTable[,1]
+    a <- QCountTable[c(1:3)]
+    a <- as.data.frame(a)
+    a <- t(a)},
+    error = function(e){a <- data.frame(V1=0,V2=0,V3=0)
+    return(a)})
+  
+  
+  
+  row.names(a) <- nameOftable
+  CD8HS <- rbind(CD8HS, a)
+  name_to_store <- paste(output_data,"CD8HS.txt",sep = "")
+  write.table(CD8HS, file = name_to_store)
+  rm(QCountTable,Qcount,a)
+  
+  
+  test.ppp<-ppp(x=CD4$Xadj, y=CD4$Yadj, poly_total)
+  
+  #L <- sqrt((((area(poly_total)))/10))
+  #L
+  b <- tryCatch({plot(quadratcount(test.ppp, nx = (x_lenght/0.25) , ny = (y_lenght/0.25)))
+    area(poly_total)
+    Qcount<-data.frame(quadratcount(test.ppp, nx= (x_lenght/0.25) , ny = (y_lenght/0.25)))
+    QCountTable <- data.frame(table(Qcount$Freq))
+    QCountTable <- QCountTable[order(QCountTable[,1], decreasing = TRUE),]
+    QCountTable <- QCountTable[,1]
+    b<- QCountTable[c(1:3)]
+    b <- as.data.frame(b)
+    b <- t(b)},
+    error = function(e){b <- data.frame(V1=0,V2=0,V3=0)
+    return(b)})
+  
+  row.names(b) <- nameOftable
+  CD4HS <- rbind(CD4HS, b)
+  name_to_store <- paste(output_data,"CD4HS.txt",sep = "")
+  write.table(CD4HS, file = name_to_store)
+  rm(QCountTable,Qcount,b)
+  
+}
+lapply(FUN=quadrat_computation, input_vector_x)
+
+```
+
+
+
+```{r fig.height=10, fig.width=10, message=FALSE, warning=FALSE, cache=TRUE}
+
+#input_data <- "Data/Cohort_A/"
+#output_graphs <- "Graphs/Cohort_A/"
+output_data <- "E:/AVETUXIRI/mIHF/immune_panel_1/halo_analysis/R/tables/"
+
+PD1HS<-c(1,2,3)
+PD1HS <- as.data.frame(PD1HS)
+PD1HS <- t(PD1HS)
+CD4_CD45HS<-c(1,2,3)
+CD4_CD45HS <- as.data.frame(CD4_CD45HS)
+CD4_CD45HS <- t(CD4_CD45HS)
+CD8_CD45HS<-c(1,2,3)
+CD8_CD45HS <- as.data.frame(CD8_CD45HS)
+CD8_CD45HS <- t(CD8_CD45HS)
+
+name_to_store_PD1 <- paste(output_data,"PD1HS.txt",sep = "")
+write.table(PD1HS, file = name_to_store_PD1)
+
+name_to_store_CD4_CD45 <- paste(output_data,"CD4_CD45HS.txt",sep = "")
+write.table(CD4_CD45HS, file = name_to_store_CD4_CD45)
+
+name_to_store_CD8_CD45 <- paste(output_data,"CD8_CD45HS.txt",sep = "")
+write.table(CD8_CD45HS, file = name_to_store_CD8_CD45)
 
