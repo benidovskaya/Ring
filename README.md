@@ -234,7 +234,7 @@ lapply(FUN = area_plot, x)
 
 ## Create a summary table with all your samples
 
-Now, let's create a final table with a row per sample and each column represents the density of different cell types you are studying.
+Now, let's create a final table with a row per sample and each column represent the density of different cell types you are studying.
 
 ```{r final table}
 
@@ -356,7 +356,7 @@ To answer to this question, the better representation is a box plot:
 #### Comparison between two groups
 
 Let's say you have a column with the timepoint (before - after treatment) and a column with the densities of CD3 (number of CD3 in your tumor/tumor area). 
-Here we make a Wilcox test which means that we compare the mean of density of CD3 in all tissues before and after treatment. Secondly, note that we do a paired test as we have a tissue before/after of the **same** patient. Pay attention, you need to have the same patients and the same number of tissues before/after,otherwise, remove the patients for whom you miss tissues.
+Here we make a Wilcox test which means that we compare the mean of density of CD3 in all tissues before and after treatment. Secondly, note that we do a paired test as we have a tissue before/after of the **same** patient. Pay attention, you need to have the same patients and the same number of tissues before/after, otherwise, remove the patients for whom you miss tissues.
 
 If you want to compare the type of response between patients (complete, partial, ...), you compare different patients so don't forget to set `paired` to <span style="color:green">FALSE</span>!
 
