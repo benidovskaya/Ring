@@ -27,6 +27,10 @@ library(patchwork)
 library(BBmisc)
 library(readxl)
 library(dplyr)
+library(Rcpp)
+library(circlize)
+library(DescTools)
+
 ```
 
 # Multiplex data transformation from HALO to R
@@ -547,3 +551,57 @@ ggpe
 ```
 
 Now you saw the different graphs you could generate with your data and you can replicate the principle to answer all of your questions regarding the variation of densities of you cells according to the timepoint or the response to the treatment or the type of treatment received, ...
+
+
+
+# Distances-based analysis using G-cross function 
+## Compared the probability for a i cell (e.g. a tumor cell) to meet a  j cell (e.g. a CD3+ T-cell) inside the tumor biopsy 
+
+```{r}
+setwd("~/project/tables/")
+
+x2 <- list.files ("~/project/data", pattern=".csv")
+
+
+
+AUC_plot <- function(a){
+  
+Main_table <- read.table(a, sep=",",header=TRUE)
+  
+Main_table <- Main_table %>% mutate (Xadj = Xadj*1000) %>% mutate (Yadj = Yadj*1000) %>% mutate (flag1 = ifelse(str_detect(Main_table$flag, "CD3+|CD8+"), "CD3+", Main_table$flag)) # change your CD3+CD8+ into CD3+ cells only
+  
+p.sf <- st_as_sf(Main_table, coords = c("Xadj", "Yadj")) # change the coordinates into the good format for the spatstat package
+s.sp <- as.ppp(X=st_coordinates(p.sf$geometry), W=p.sf$geometry) 
+
+
+
+###################CD3+################
+
+marks(s.sp) <- factor(p.sf$flag1, levels=c("CD3+", "Stromal cells", "Tumor cells"))
+  
+valueG <- Gcross(s.sp, i="Tumor cells", j="CD3+", correction="rs") # use the G-cross function to know the probablity for a tumor cell to meet a CD3+ T-cells by using the border correction (please see Gcross arguments description in R) 
+plot(valueG, main = str_replace(a, ".csv", "")) # For more info please read: Parra ER. Methods to Determine and Analyze the Cellular Spatial Distribution Extracted From Multiplex Immunofluorescence Data to Understand the Tumor Microenvironment. Front Mol Biosci. 2021;8:668340. Published 2021 Jun 14. doi:10.3389/fmolb.2021.668340
+  
+  try(complete_plot_path_name <- paste(output_graphs,  str_replace(a, ".csv", "_Gcrossfunction_CD3"), ".png", sep = ""))
+dev.copy(png,complete_plot_path_name )
+ dev.off()
+  
+ rs <- as.data.frame(valueG$rs)
+ r <- as.data.frame(valueG$r)
+ 
+rs_r <- cbind(r,rs)
+ 
+AUC <- AUC(valueG$r, valueG$rs, from = min(valueG$r, na.rm = TRUE), to = max(20, na.rm = TRUE), 
+    method = c("trapezoid"), 
+    absolutearea = FALSE, subdivisions = 100, na.rm = FALSE) ## function used to know the area under the curve of the probability for a radius from 0 to 20µm for example as described in the article: Barua S, Fang P, Sharma A, Fujimoto J, Wistuba I, Rao AUK, Lin SH. Spatial interaction of tumor cells and regulatory T cells correlates with survival in non-small cell lung cancer. Lung Cancer. 2018 Mar;117:73-79.
+
+plot1 <- ggplot(rs_r, aes(x=valueG$r, y=valueG$rs)) + geom_point()+geom_area(fill = "light green")+ annotate("text",  label= "AUC (r<20µm) = ", x=14, y=0.9, size=4.5, color="light green")+ annotate("text",  label= round(AUC[1],5), x=45, y=0.9, size=4.5, color="light green")+theme_bw()+labs(title=str_replace(a, ".csv","CD3"), y="Border corrected estimate of G", x="Distance (µm)")+theme(plot.title = element_text(hjust = 0.5))
+
+complete_plot_path_name <- paste(output_graphs, str_replace(a, ".csv", "_AUC_plot_CD3"), ".png", sep = "")
+ggsave(plot1, file = complete_plot_path_name, dpi = 320, units = "mm")
+}
+
+lapply(FUN = AUC_plot, x2)
+```
+
+
