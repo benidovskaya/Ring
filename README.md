@@ -5,7 +5,6 @@ Benidovskaya Elena, Beyaert Simon and Huyghe Nicolas (22.02.2023)
 # Packages to load for this script
 
 ```{r packages}
-library(wesh)
 library(tidyverse)
 library(ggplot2)
 library(tibble)
