@@ -1,6 +1,6 @@
 # Ring : Pipeline for the analysis of multiplex immunofluorescence stainings.
 
-In article, please cite the original paper: *to be completed*
+In article, please cite the original paper: Huyghe, N., Benidovskaya, E., Beyaert, S., Daumerie, A., Maestre Osorio, F., Aboubakar Nana, F., Bouzin, C., Van den Eynde, M. Multiplex Immunofluorescence Combined with Spatial Image Analysis for the Clinical and Biological Assessment of the Tumor Microenvironment. J. Vis. Exp. (196), e65220, doi:10.3791/65220 (2023).
 
 Code written by: Benidovskaya Elena, Beyaert Simon and Huyghe Nicolas (22.02.2023)
 
